@@ -1,72 +1,48 @@
-from dataclasses import dataclass
+class Board:
+    def __init__(self, grid):
+        self.rows = [set(x) for x in grid + list(zip(*grid))]
+        self.numbers = set.union(*self.rows)
+
+    def bingo(self, numbers):
+        return any(r.issubset(numbers) for r in self.rows)
+
+    def sum_unmarked(self, numbers):
+        return sum(self.numbers - numbers)
 
 
-@dataclass
-class Cell:
-    value: int
-    visited: int = False
+def int_grid(g):
+    return [[int(x) for x in l.split()] for l in g.splitlines()]
 
 
-def bingo_score(board, row, col):
-    unvisited = [c for r in board for c in r if not c.visited]
-    return board[row][col].value * sum(x.value for x in unvisited)
+def part_1(bingo_numbers, grids):
+    boards = [Board(int_grid(g)) for g in grids]
+    visited = set()
+
+    for n in bingo_numbers:
+        visited.add(n)
+        for b in boards:
+            if b.bingo(visited):
+                return n * b.sum_unmarked(visited)
 
 
-def bingo(board, row, col):
-    if all(c.visited for c in board[row]):
-        return bingo_score(board, row, col)
-    if all(c.visited for c in (r[col] for r in board)):
-        return bingo_score(board, row, col)
-    return 0
+def part_2(bingo_numbers, grids):
+    boards = [Board(int_grid(g)) for g in grids]
+    visited = set()
+
+    for n in bingo_numbers:
+        visited.add(n)
+        for b in boards:
+            if b.bingo(visited):
+                boards.remove(b)
+
+            if len(boards) == 0:
+                return n * b.sum_unmarked(visited)
 
 
 if __name__ == "__main__":
     with open("04.in") as f:
-        bingo_row = [int(x) for x in f.readline().split(",")]
-        f.readline()
+        bingo_numbers, *grids = f.read().split("\n\n")
 
-        boards = []
-        board = []
-        for l in f.readlines():
-            l = l.strip()
-            if not l:
-                boards.append(board)
-                board = []
-            else:
-                board.append([Cell(int(x)) for x in l.split()])
-        boards.append(board)
-
-        board_maps = []
-        for board in boards:
-            board_map = {}
-            for r, row in enumerate(board):
-                for c, n in enumerate(row):
-                    board_map[n.value] = (r, c)
-
-            board_maps.append(board_map)
-
-    won = [False for _ in range(len(boards))]
-
-    for x in bingo_row:
-        for i, (board, board_map) in enumerate(zip(boards, board_maps)):
-            if won[i]:
-                continue
-            try:
-                row, col = board_map[x]
-            except KeyError:
-                continue
-
-            board[row][col].visited = True
-
-            score = bingo(board, row, col)
-            if score:
-                # Part 1
-                if not any(won):
-                    print(score)
-
-                won[i] = True
-
-                # Part 2
-                if all(won):
-                    print(score)
-                    exit()
+    bingo_numbers = [int(x) for x in bingo_numbers.split(",")]
+    print(part_1(bingo_numbers, grids))
+    print(part_2(bingo_numbers, grids))
