@@ -1,50 +1,28 @@
-from collections import defaultdict
+import collections
+import itertools
 
 
 def ranger(a, b):
     if a > b:
-        return reversed(range(b, a + 1))
-    if b > a:
-        return range(a, b + 1)
-
-    raise ValueError("same")
+        return range(a, b - 1, -1)
+    return range(a, b + 1)
 
 
 with open("05.in") as f:
-    input = [x.strip().replace("->", ",").split(",") for x in f.readlines()]
-input = [[int(x) for x in e] for e in input]
-coordinates = [[(x[0], x[1]), (x[2], x[3])] for x in input]
+    input = (x.strip() for x in f.readlines())
 
-points = defaultdict(int)
-for p1, p2 in coordinates:
-    if p1[0] == p2[0]:
-        for n in ranger(p1[1], p2[1]):
-            p = (p1[0], n)
-            points[p] += 1
+c1 = collections.Counter()
+c2 = collections.Counter()
+for l in input:
+    x1, y1, x2, y2 = (int(x) for x in l.replace("->", ",").split(","))
+    if x1 == x2 or y1 == y2:  # Horizontal or vertical
+        points = list(itertools.product(ranger(x1, x2), ranger(y1, y2)))
+        c1.update(points)
+        c2.update(points)
 
-    elif p1[1] == p2[1]:
-        for n in ranger(p1[0], p2[0]):
-            p = (n, p1[1])
-            points[p] += 1
+    else:  # Assume diagonal
+        points = zip(ranger(x1, x2), ranger(y1, y2))
+        c2.update(points)
 
-print(len([x for x in points.values() if x > 1]))
-
-points = defaultdict(int)
-for p1, p2 in coordinates:
-    if p1[0] == p2[0]:
-        for n in ranger(p1[1], p2[1]):
-            p = (p1[0], n)
-            points[p] += 1
-
-    elif p1[1] == p2[1]:
-        for n in ranger(p1[0], p2[0]):
-            p = (n, p1[1])
-            points[p] += 1
-
-    else:
-        for a, b in zip(ranger(p1[0], p2[0]), ranger(p1[1], p2[1])):
-            p = (a, b)
-            points[p] += 1
-
-
-print(len([x for x in points.values() if x > 1]))
+print(sum(x > 1 for x in c1.values()))
+print(sum(x > 1 for x in c2.values()))
