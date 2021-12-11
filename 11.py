@@ -28,11 +28,13 @@ def reset(x):
 with open("11.in") as f:
     grid = [[int(x) for x in l.strip()] for l in f.readlines()]
 
+width = len(grid)
+height = len(grid[0])
+
 flashes = 0
 for gen in itertools.count(1):
-    for r, row in enumerate(grid):
-        for c, x in enumerate(row):
-            step(grid, r, c)
+    for r, c in itertools.product(range(width), range(height)):
+        step(grid, r, c)
 
     grid = [[reset(x) for x in row] for row in grid]
     flashes += sum(sum(x == 0 for x in row) for row in grid)
