@@ -28,12 +28,12 @@ def reset(x):
 with open("11.in") as f:
     grid = [[int(x) for x in l.strip()] for l in f.readlines()]
 
-width = len(grid)
-height = len(grid[0])
+height = len(grid)
+width = len(grid[0])
 
 flashes = 0
 for gen in itertools.count(1):
-    for r, c in itertools.product(range(width), range(height)):
+    for r, c in itertools.product(range(height), range(width)):
         step(grid, r, c)
 
     grid = [[reset(x) for x in row] for row in grid]
