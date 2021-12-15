@@ -11,15 +11,16 @@ def neighbors(grid, r, c):
 
 
 def solve(grid, start, goal):
-    distance = [[None for _ in row] for row in grid]
+    distance = [[float("inf") for _ in row] for row in grid]
     q = [(0, *start)]
     while q:
         (d, r, c) = heapq.heappop(q)
+
         d += grid[r][c]
-        if distance[r][c] is None or d < distance[r][c]:
-            distance[r][c] = d
-        else:
+        if d >= distance[r][c]:
             continue
+
+        distance[r][c] = d
 
         # print()
         # plot(distance, grid, r, c)
@@ -28,11 +29,12 @@ def solve(grid, start, goal):
             break
 
         for nr, nc in neighbors(grid, r, c):
-            heapq.heappush(q, (distance[r][c], nr, nc))
+            if distance[nr][nc] == float("inf"):
+                heapq.heappush(q, (d, nr, nc))
 
     # plot(distance, grid, r, c)
 
-    return distance[r][c] - grid[start[0]][start[1]]
+    return d - grid[start[0]][start[1]]
 
 
 def path(distance, r, c):
@@ -40,7 +42,7 @@ def path(distance, r, c):
         yield r, c
         min = distance[r][c]
         for nr, nc in neighbors(distance, r, c):
-            if distance[nr][nc] and distance[nr][nc] < min:
+            if distance[nr][nc] < min:
                 r, c = nr, nc
 
         if min == distance[r][c]:
