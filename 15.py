@@ -1,9 +1,4 @@
 import heapq
-import itertools
-from collections import defaultdict, Counter, deque
-
-with open("15.in") as f:
-    grid = [[int(x) for x in l] for l in f.read().splitlines()]
 
 
 def neighbors(grid, r, c):
@@ -15,10 +10,9 @@ def neighbors(grid, r, c):
         yield nr, nc
 
 
-def solve(grid):
-    rows, cols = len(grid), len(grid[0])
+def solve(grid, start, goal):
     distance = [[None for _ in row] for row in grid]
-    q = [(0, 0, 0)]
+    q = [(0, *start)]
     while q:
         (d, r, c) = heapq.heappop(q)
         d += grid[r][c]
@@ -27,7 +21,10 @@ def solve(grid):
         else:
             continue
 
-        if r == rows - 1 and c == cols - 1:
+        # print()
+        # plot(distance, grid, r, c)
+
+        if (r, c) == goal:
             break
 
         for nr, nc in neighbors(grid, r, c):
@@ -35,7 +32,7 @@ def solve(grid):
 
     # plot(distance, grid, r, c)
 
-    return distance[rows - 1][cols - 1] - grid[0][0]
+    return distance[r][c] - grid[start[0]][start[1]]
 
 
 def path(distance, r, c):
@@ -43,7 +40,7 @@ def path(distance, r, c):
         yield r, c
         min = distance[r][c]
         for nr, nc in neighbors(distance, r, c):
-            if distance[nr][nc] < min:
+            if distance[nr][nc] and distance[nr][nc] < min:
                 r, c = nr, nc
 
         if min == distance[r][c]:
@@ -61,9 +58,9 @@ def plot(distance, grid, r, c):
 
 def increment(grid, n):
     new_grid = []
-    for i, r in enumerate(grid):
+    for r in grid:
         new_row = []
-        for j, x in enumerate(r):
+        for x in r:
             x += n
             while x > 9:
                 x -= 9
@@ -83,5 +80,16 @@ def extend(grid, n):
     return grid_right
 
 
-print(solve(grid))
-print(solve(extend(grid, 5)))
+if __name__ == "__main__":
+    with open("15.in") as f:
+        grid = [[int(x) for x in l] for l in f.read().splitlines()]
+
+    # Part 1
+    start = (0, 0)
+    goal = (len(grid) - 1, len(grid[0]) - 1)
+    print(solve(grid, start, goal))
+
+    # Part 2
+    grid = extend(grid, 5)
+    goal = (len(grid) - 1, len(grid[0]) - 1)
+    print(solve(grid, start, goal))
